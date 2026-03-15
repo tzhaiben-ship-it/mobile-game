@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>SKYFORCE — B-2 Spirit 3D</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="ss">
+  <canvas id="sc2"></canvas>
+  <div id="scon">
+    <div class="logo">SKYFORCE</div>
+    <div class="sub">B-2 Spirit · Air Combat · 3D</div>
+    <div class="sdiv"></div>
+    <div class="cgrid">
+      <div>סיבוב<span>↑↓←→</span></div><div>גז<span>W/S</span></div><div>ירי<span>SPACE</span></div>
+      <div>מצלמה<span>V</span></div><div>נשק<span>1/2/3</span></div><div>כיול גירו<span>C</span></div>
+    </div>
+    <div style="font-size:.6rem;color:rgba(76,201,240,.55);margin-bottom:1rem;letter-spacing:.1em;">🔵 Checkpoint כחול = טילים &nbsp;|&nbsp; 🟢 Checkpoint ירוק = חיים</div>
+    <button id="bstart">▶ התחל טיסה</button>
+  </div>
+</div>
+<div id="go">
+  <h2>MISSION FAILED</h2>
+  <div id="fscore"></div>
+  <button id="breset">↺ נסה שוב</button>
+</div>
+<div id="hud">
+  <div id="htop">
+    <div class="hb"><div class="hl2">מהירות</div><div class="hv" id="sv">000</div><div class="hu">KTS</div></div>
+    <div class="hb hblue"><div class="hl2">גובה</div><div class="hv" id="av">0000</div><div class="hu">FT</div></div>
+    <div class="hb hgold"><div class="hl2">מאך</div><div class="hv" id="mv">0.00</div></div>
+    <div class="hb"><div class="hl2">כותרת</div><div class="hv" id="ch">000°</div><div class="hu" id="cd">צפון</div></div>
+    <div class="hb hgold"><div class="hl2">ניקוד</div><div class="hv" id="scv">0</div></div>
+    <div class="hb"><div class="hl2">VS</div><div class="hv" id="vsv">+0</div><div class="hu">FPM</div></div>
+    <div class="hb hred"><div class="hl2">G</div><div class="hv" id="gv">1.0G</div></div>
+    <div class="hb hblue"><div class="hl2">הריגות</div><div class="hv" id="kv">0</div></div>
+    <div class="hb"><div class="hl2">זמן</div><div class="hv" id="tv">00:00</div></div>
+    <div class="hb" style="border-right:none;background:rgba(255,190,11,.07)"><div class="hl2">גל</div><div class="hv" id="wave-val" style="color:var(--no)">1</div><div class="hu">WAVE</div></div>
+  </div>
+  <div id="cstrip"><div id="cstripIn"></div></div>
+  <div id="hbot">
+    <div class="bar-wrap">
+      <div class="bar-row"><div class="bar-lbl">HP</div><div class="bar-bg"><div class="bar-fill" id="hpf" style="width:100%;background:#00ff88"></div></div></div>
+      <div class="bar-row"><div class="bar-lbl">דלק</div><div class="bar-bg"><div class="bar-fill" id="fuf" style="width:100%;background:#4cc9f0"></div></div></div>
+      <div class="bar-row" style="margin-top:2px"><div class="bar-lbl" style="font-size:.4rem;width:36px">אויבים</div><div style="color:var(--nr);font-family:var(--ft);font-size:.7rem" id="enemies-val">—</div></div>
+    </div>
+    <div id="wep-panel">
+      <div class="wslot sel" id="slot-bullets"><div class="wi">🔫</div><div>מקלע</div><div class="wa" id="ammo-bullets">∞</div></div>
+      <div class="wslot" id="slot-missiles"><div class="wi">🚀</div><div>טיל</div><div class="wa" id="ammo-missiles">6</div></div>
+      <div class="wslot" id="slot-bombs"><div class="wi">💣</div><div>פצצה</div><div class="wa" id="ammo-bombs">4</div></div>
+    </div>
+    <div id="wepmode">מקלע</div>
+    <div id="adi-wrap"><div id="adi-bg"><div id="adi-line"></div></div><div id="adi-mid"></div></div>
+    <div style="display:flex;flex-direction:column;gap:3px;font-size:.48rem;color:rgba(0,255,136,.42);">
+      <div>כיסוי: <span id="gl" style="color:var(--nr);font-family:var(--ft)">▮</span> <span id="gt">UP</span></div>
+      <div>גז: <span id="thrpct" style="color:var(--ng);font-family:var(--ft)">50%</span></div>
+    </div>
+  </div>
+  <div id="warns">
+    <div class="warn red" id="w-stall">⚠ STALL</div>
+    <div class="warn red" id="w-over">⚠ OVERSPEED</div>
+    <div class="warn gold" id="w-pull">⚠ PULL UP</div>
+    <div class="warn gold" id="w-fuel">⚠ FUEL LOW</div>
+    <div class="warn red" id="w-lock">◉ LOCKED</div>
+    <div class="warn red" id="w-ammo">⚠ NO AMMO</div>
+  </div>
+  <div id="gpws">⚠ GPWS — PULL UP</div>
+  <div id="xhair"></div>
+  <div id="mxhair"></div>
+  <div id="mlock">◉ MISSILE LOCK</div>
+  <div id="expl"></div>
+  <div id="pickup-msg"></div>
+</div>
+<div id="ctrl">
+  <div id="jzone"><div id="jbase"></div><div id="jknob"></div></div>
+  <div id="thrtrack"><div id="thrfill" style="height:50%"></div><div id="thrhandle" style="bottom:50%"></div></div>
+  <button class="act-btn" id="bfire">🔥</button>
+  <button class="act-btn" id="bwep">⚔ WEP</button>
+</div>
+<div id="radar"><canvas id="rcanvas" width="120" height="120"></canvas></div>
+<button id="camBtn">📷 תצוגה ▾</button>
+<div id="camlbl">COCKPIT</div>
+<button id="settBtn">⚙</button>
+<button id="gyro-btn" onclick="calibrateGyro()">📱 ג'ירו</button>
+<div class="corner" id="cl"><div style="color:rgba(0,255,136,.45);font-size:.45rem;margin-bottom:3px">מיקום</div><div class="cv" id="posv">0,0</div></div>
+<div class="corner" id="cr"><div style="color:rgba(0,255,136,.45);font-size:.45rem;margin-bottom:3px">מצב</div><div class="cv" style="color:var(--no)" id="statv">CRUISE</div></div>
+<div id="sett">
+  <div style="font-family:var(--ft);font-size:.7rem;letter-spacing:.3em;color:var(--ng);margin-bottom:12px">⚙ הגדרות</div>
+  <div class="st">מצלמה</div>
+  <div class="cam-row">
+    <button class="cbtn sel" data-cam="cockpit">COCKPIT</button>
+    <button class="cbtn" data-cam="chase">CHASE</button>
+    <button class="cbtn" data-cam="external">EXTERNAL</button>
+    <button class="cbtn" data-cam="gun">GUN CAM</button>
+    <button class="cbtn" data-cam="orbit">ORBIT</button>
+  </div>
+  <div class="st">גרפיקה</div>
+  <div class="srow"><span>עננים</span><div class="tog-sw on" id="tog-clouds"></div></div>
+  <div class="srow"><span>הרים</span><div class="tog-sw on" id="tog-mnt"></div></div>
+  <div class="srow"><span>גלים</span><div class="tog-sw on" id="tog-waves"></div></div>
+  <div class="srow"><span>Bloom</span><div class="tog-sw on" id="tog-bloom"></div></div>
+  <div class="srow"><span>כוכבים</span><div class="tog-sw on" id="tog-stars"></div></div>
+  <div class="srow"><span>FOV <span id="fovlbl" class="slbl">75°</span></span></div>
+  <input type="range" id="fovs" min="50" max="110" value="75" style="width:100%;accent-color:var(--ng)">
+  <div class="srow"><span>שעת יום <span id="todlbl" class="slbl">יום</span></span></div>
+  <input type="range" id="tods" min="0" max="100" value="75" style="width:100%;accent-color:var(--ng)">
+  <div class="st">מאיים</div>
+  <div class="srow"><span>AI</span><div class="tog-sw on" id="tog-ai"></div></div>
+  <div class="srow"><span>קושי AI <span id="difflbl" class="slbl">3</span></span></div>
+  <input type="range" id="diffs" min="1" max="5" value="3" style="width:100%;accent-color:var(--ng)">
+  <div class="st">שליטה</div>
+  <div class="srow"><span>רגישות <span id="senslbl" class="slbl">1.0x</span></span></div>
+  <input type="range" id="senss" min="2" max="20" value="10" style="width:100%;accent-color:var(--ng)">
+  <div class="st">רזולוציה</div>
+  <div class="q-row">
+    <button class="qbtn" data-q="0.5">LOW</button>
+    <button class="qbtn sel" data-q="1">MED</button>
+    <button class="qbtn" data-q="1.5">HIGH</button>
+    <button class="qbtn" data-q="2">ULTRA</button>
+  </div>
+  <p class="note">ULTRA = 4K. עלול להאט.</p>
+  <div class="st">גירוסקופ (מובייל)</div>
+  <div class="srow">
+    <span>כיול תנוחה</span>
+    <button onclick="calibrateGyro()" style="font-family:var(--ft);font-size:.5rem;padding:4px 12px;background:transparent;border:1px solid var(--nb);color:var(--nb);cursor:pointer">כייל</button>
+  </div>
+  <p class="note">הטה המכשיר לתנוחה טבעית ולחץ "כייל".</p>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
